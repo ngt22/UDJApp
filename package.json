@@ -1,0 +1,19 @@
+{
+  "name": "udj-app-monorepo",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend start",
+    "dev:web": "pnpm --filter web dev",
+    "build:frontend": "pnpm --filter frontend build",
+    "build:web": "pnpm --filter web build",
+    "build:backend": "pnpm --filter backend build",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  }
+}

@@ -1,0 +1,31 @@
+.current-playlist ul {
+  list-style: none;
+}
+.current-playlist .song-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+.current-playlist .song-item:last-child {
+  border-bottom: none;
+}
+.current-playlist .thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  margin-right: 15px;
+  object-fit: cover;
+}
+.current-playlist .song-details {
+  display: flex;
+  flex-direction: column;
+}
+.current-playlist .title {
+  font-weight: 500;
+}
+.current-playlist .status-playing {
+  font-size: 0.9em;
+  color: #27ae60; /* Green for playing status */
+  font-weight: bold;
+}

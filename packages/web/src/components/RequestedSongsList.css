@@ -1,0 +1,55 @@
+.requested-songs-list ul {
+  list-style: none;
+}
+.requested-songs-list .requested-song-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  gap: 10px;
+}
+.requested-songs-list .requested-song-item:last-child {
+  border-bottom: none;
+}
+.requested-songs-list .thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  margin-right: 10px; /* Adjusted from 15px */
+  object-fit: cover;
+}
+.requested-songs-list .song-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.requested-songs-list .title {
+  font-weight: 500;
+}
+.requested-songs-list .requested-by {
+  font-size: 0.85em;
+  color: #555;
+}
+.requested-songs-list .vote-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.requested-songs-list .vote-button {
+  padding: 8px 12px;
+  background-color: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.requested-songs-list .vote-button:hover {
+  background-color: #d35400;
+}
+.requested-songs-list .votes {
+  font-size: 0.95em;
+  font-weight: bold;
+  color: #333;
+}

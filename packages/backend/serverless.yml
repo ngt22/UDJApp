@@ -1,0 +1,144 @@
+service: udj-backend
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1 # Or your preferred region
+  stage: dev
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${sls:stage}-data
+    # EXAMPLE_VAR: 'exampleValue' # Keep or remove
+
+  # Add IAM permissions for Lambda to access DynamoDB
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+package:
+  individually: true
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false # true for prod
+    sourcemap: true
+    exclude: ['aws-sdk']
+    target: 'node18'
+    define: { 'require.resolve': undefined }
+    platform: 'node'
+    concurrency: 10
+  # serverless-offline configuration (optional, for local testing)
+  serverless-offline:
+    httpPort: 4000
+    lambdaPort: 4002
+    # Uncomment to use in-memory DynamoDB for local development
+    # dynamodb:
+    #   stages:
+    #     - dev
+    #   start:
+    #     port: 8000
+    #     inMemory: true
+    #     migrate: true # auto-create table on start
+    #   migration:
+    #     dir: offline/migrations # if you have migration scripts
+
+functions:
+  # Hello function (keep or remove)
+  hello:
+    handler: src/functions/hello/handler.main # Assuming you move it
+    events:
+      - httpApi:
+          path: /hello
+          method: get
+
+  # Playlist Functions
+  createPlaylist:
+    handler: src/functions/playlists/playlistHandler.createPlaylist
+    events:
+      - httpApi:
+          path: /playlists
+          method: post
+  getPlaylists: # Get all playlists for a user
+    handler: src/functions/playlists/playlistHandler.getPlaylistsByUser
+    events:
+      - httpApi:
+          path: /playlists/{userId} # Or derive userId from auth context later
+          method: get
+  getPlaylist: # Get a specific playlist
+    handler: src/functions/playlists/playlistHandler.getPlaylistById
+    events:
+      - httpApi:
+          path: /playlists/{userId}/{playlistId} # Or /playlist/{playlistId} if globally unique and auth protected
+          method: get
+  updatePlaylist:
+    handler: src/functions/playlists/playlistHandler.updatePlaylist
+    events:
+      - httpApi:
+          path: /playlists/{userId}/{playlistId}
+          method: put
+  deletePlaylist:
+    handler: src/functions/playlists/playlistHandler.deletePlaylist
+    events:
+      - httpApi:
+          path: /playlists/{userId}/{playlistId}
+          method: delete
+
+  addSongToPlaylist:
+    handler: src/functions/playlists/playlistHandler.addSongToPlaylist
+    events:
+      - httpApi:
+          path: /playlists/{userId}/{playlistId}/songs
+          method: post
+  removeSongFromPlaylist:
+    handler: src/functions/playlists/playlistHandler.removeSongFromPlaylist
+    events:
+      - httpApi:
+          path: /playlists/{userId}/{playlistId}/songs/{songId}
+          method: delete
+  # Reorder songs might be part of updatePlaylist or a separate function
+
+resources:
+  Resources:
+    UDJDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: PK # Partition Key
+            AttributeType: S
+          - AttributeName: SK # Sort Key
+            AttributeType: S
+          # Optional: Define GSI for querying playlists by user, etc.
+          # - AttributeName: GSI1PK
+          #   AttributeType: S
+          # - AttributeName: GSI1SK
+          #   AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST # Or PROVISIONED
+        # GlobalSecondaryIndexes:
+        #   - IndexName: GSI1
+        #     KeySchema:
+        #       - AttributeName: GSI1PK
+        #         KeyType: HASH
+        #       - AttributeName: GSI1SK
+        #         KeyType: RANGE
+        #     Projection:
+        #       ProjectionType: ALL # Or KEYS_ONLY, INCLUDE
